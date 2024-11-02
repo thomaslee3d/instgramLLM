@@ -1,0 +1,24 @@
+# .gitignore
+
+# Virtual Environment
+env/
+
+# Python Cache Files
+__pycache__/
+*.pyc
+
+# Model Files
+models/
+
+# Logs
+*.log
+
+# Configuration Files
+config.py
+.env
+
+# Drivers
+drivers/
+
+#user data
+READ_ME_WHEN_STARTING.txt

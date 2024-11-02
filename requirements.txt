@@ -1,0 +1,9 @@
+# requirements.txt
+
+transformers==4.30.2
+torch==2.0.1
+accelerate==0.21.0
+bitsandbytes==0.39.0
+praw==7.5.0
+selenium==4.10.0
+pathlib==1.0.1
