@@ -346,6 +346,103 @@ git branch praw
 
 
 
+Create a file  called fetch_reddit_posts.py in the scripts folder
+
+# scripts/fetch_reddit_posts.py
+
+import praw
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+import logging
+
+def setup_logging():
+    logging.basicConfig(
+        filename='fetch_reddit_posts.log',
+        level=logging.DEBUG,  # Changed to DEBUG for more detailed logs
+        format='%(asctime)s:%(levelname)s:%(message)s'
+    )
+    # Also log to console
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
+def fetch_posts(subreddit_name, limit=10):
+    try:
+        # Initialize Reddit instance
+        reddit = praw.Reddit(
+            client_id=os.getenv('REDDIT_CLIENT_ID'),
+            client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
+            user_agent=os.getenv('REDDIT_USER_AGENT')
+        )
+        
+        # Debugging: Print user_agent
+        user_agent = os.getenv('REDDIT_USER_AGENT')
+        print(f"DEBUG: Using user_agent: {user_agent}")
+        logging.debug(f"Using user_agent: {user_agent}")
+        
+        subreddit = reddit.subreddit(subreddit_name)
+        posts = []
+        
+        logging.debug(f"Fetching top {limit} hot posts from subreddit '{subreddit_name}'")
+        
+        for submission in subreddit.hot(limit=limit):
+            if not submission.stickied:
+                post = {
+                    'title': submission.title,
+                    'selftext': submission.selftext,
+                    'url': submission.url
+                }
+                posts.append(post)
+                logging.info(f"Fetched post: {submission.title}")
+        
+        logging.debug(f"Total posts fetched: {len(posts)}")
+        return posts
+    except praw.exceptions.PRAWException as e:
+        logging.error(f"PRAW Exception: {e}")
+    except Exception as e:
+        logging.error(f"Error fetching posts from subreddit '{subreddit_name}': {e}")
+    return []
+
+if __name__ == "__main__":
+    setup_logging()
+    SUBREDDIT = 'TrendingReddits'  # Replace with your target subreddit without 'r/' or trailing '/'    < -------------------------->
+    LIMIT = 10  # Number of posts to fetch
+    
+    posts = fetch_posts(SUBREDDIT, LIMIT)
+    
+    if posts:
+        # Save posts to a JSON or CSV file for further processing
+        import json
+        with open('reddit_posts.json', 'w', encoding='utf-8') as f:
+            json.dump(posts, f, ensure_ascii=False, indent=4)
+        logging.info(f"Saved {len(posts)} posts to 'reddit_posts.json'")
+    else:
+        logging.info("No posts fetched.")
+
+
+    update .env with reddit credentials
+
+    # .env
+
+REDDIT_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxx
+REDDIT_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxx
+REDDIT_USER_AGENT=OPERATING_SYSTEM:APP_NAME/VERSION(by /u/USERNAME)
+ACTIVE_MODEL=gpt-j-6B
+# Or distilgpt2
+
+
+
+
+
+
+
+
+
+
+
 
 
 
